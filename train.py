@@ -46,7 +46,7 @@ def train(**kwargs):
     opt._parse(kwargs)
 
     # dataset = Dataset(opt)
-    dataset = CsvDataset('path_to_images', 'labeled_with_classes.csv')
+    dataset = CsvDataset('/home/artemlyan/data/avito_intro/images/', 'labeled_with_classes.csv')
     print('load data')
     dataloader = data_.DataLoader(dataset, \
                                   batch_size=1, \
