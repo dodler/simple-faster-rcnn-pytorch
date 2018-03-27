@@ -99,6 +99,12 @@ class Transform(object):
 
         return img, bbox, label, scale
 
+class CsvDB:
+    def __init__(self, labels_len):
+        self.labels_name = []
+        for i in range(labels_len):
+            self.labels_name.append('label' +str(i))
+
 
 class CsvDataset(object):
     def __init__(self, base, csv_path):
@@ -106,6 +112,7 @@ class CsvDataset(object):
         self._csv = pd.read_csv(csv_path)
         self._train, self._test = train_test_split(self._csv)
         self._mode = 'train'
+        self.db = CsvDB(1000)
 
     def set_mode(self, mode):
         self._mode = mode
@@ -125,7 +132,6 @@ class CsvDataset(object):
         label = target_csv.iloc[item, 5]
         box = [target_csv.iloc[item, 1], target_csv.iloc[item, 2], target_csv.iloc[item, 3], target_csv.iloc[item, 4]]
         return img, box, label, 1
-
 
 class Dataset:
     def __init__(self, opt):
