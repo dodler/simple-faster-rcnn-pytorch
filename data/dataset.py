@@ -150,7 +150,7 @@ class CsvDataset(object):
         x2 = float(target_csv.iloc[item, 3] * img_size[0])
         y2 = float(target_csv.iloc[item, 4] * img_size[1])
         box = torch.FloatTensor([x1, y1, x2, y2])
-        return img, box, label, torch.FloatTensor(1)
+        return img, np.stack(box), label, torch.FloatTensor(1)
 
 
 class Dataset:
