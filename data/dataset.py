@@ -142,7 +142,7 @@ class CsvDataset(object):
             target_csv = self._test
 
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        img_size = img.size()
+        img_size = img.size
         img = self._transform(img)
         label = torch.LongTensor(target_csv.iloc[item, 5])
         x1 = target_csv.iloc[item, 1] * img_size[0]
