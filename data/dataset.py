@@ -101,18 +101,28 @@ class Transform(object):
 
 class CsvDB:
     def __init__(self, labels_len):
-        self.labels_name = []
+        self.label_names = []
         for i in range(labels_len):
-            self.labels_name.append('label' +str(i))
+            self.label_names.append('label' +str(i))
 
+from torchvision.transforms import *
+
+
+rgb_mean = (0.4914, 0.4822, 0.4465)
+rgb_std = (0.2023, 0.1994, 0.2010)
+
+size=224
 
 class CsvDataset(object):
-    def __init__(self, base, csv_path):
+    def __init__(self, base, csv_path, transform = None):
+        self._transform = transform
         self._base = base
         self._csv = pd.read_csv(csv_path)
         self._train, self._test = train_test_split(self._csv)
         self._mode = 'train'
         self.db = CsvDB(1000)
+        if transform is None:
+            self._transform = Compose([Resize((size,size)), ToTensor(), Normalize(rgb_mean, rgb_std)])
 
     def set_mode(self, mode):
         self._mode = mode
@@ -129,7 +139,9 @@ class CsvDataset(object):
             target_csv = self._test
 
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        label = target_csv.iloc[item, 5]
+        img_size = img.size()
+        img = self._transform(img)
+        label = torch.LongTensor(target_csv.iloc[item, 5])
         box = [target_csv.iloc[item, 1], target_csv.iloc[item, 2], target_csv.iloc[item, 3], target_csv.iloc[item, 4]]
         return img, box, label, 1
 
