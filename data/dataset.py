@@ -145,10 +145,10 @@ class CsvDataset(object):
         img_size = img.size
         img = self._transform(img)
         label = torch.LongTensor(target_csv.iloc[item, 5])
-        x1 = target_csv.iloc[item, 1] * img_size[0]
-        y1 = target_csv.iloc[item,2] * img_size[1]
-        x2 = target_csv.iloc[item, 3] * img_size[0]
-        y2 = target_csv.iloc[item, 4] * img_size[1]
+        x1 = target_csv.iloc[item, 1].values * img_size[0]
+        y1 = target_csv.iloc[item,2].values * img_size[1]
+        x2 = target_csv.iloc[item, 3].values * img_size[0]
+        y2 = target_csv.iloc[item, 4].values * img_size[1]
         box = torch.FloatTensor([x1, y1, x2, y2])
         return img, box, label, torch.FloatTensor(1)
 
