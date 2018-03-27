@@ -1,22 +1,19 @@
 import os
+import resource
 
 import ipdb
 import matplotlib
-from tqdm import tqdm
-
-from utils.config import opt
-from data.dataset import Dataset, TestDataset, inverse_normalize
-from model import FasterRCNNVGG16
 from torch.autograd import Variable
 from torch.utils import data as data_
+from tqdm import tqdm
+
+from data.dataset import TestDataset, inverse_normalize, CsvDataset
+from model import FasterRCNNVGG16
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
-from utils.vis_tool import visdom_bbox
+from utils.config import opt
 from utils.eval_tool import eval_detection_voc
-
-# fix for ulimit
-# https://github.com/pytorch/pytorch/issues/973#issuecomment-346405667
-import resource
+from utils.vis_tool import visdom_bbox
 
 rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (20480, rlimit[1]))
@@ -48,7 +45,8 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def train(**kwargs):
     opt._parse(kwargs)
 
-    dataset = Dataset(opt)
+    # dataset = Dataset(opt)
+    dataset = CsvDataset('path_to_images', 'labeled_with_classes.csv')
     print('load data')
     dataloader = data_.DataLoader(dataset, \
                                   batch_size=1, \

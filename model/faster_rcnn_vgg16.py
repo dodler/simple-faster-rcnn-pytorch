@@ -1,8 +1,9 @@
 import torch as t
 from torch import nn
 from torchvision.models import vgg16
-from model.region_proposal_network import RegionProposalNetwork
+
 from model.faster_rcnn import FasterRCNN
+from model.region_proposal_network import RegionProposalNetwork
 from model.roi_module import RoIPooling2D
 from utils import array_tool as at
 from utils.config import opt
@@ -54,7 +55,7 @@ class FasterRCNNVGG16(FasterRCNN):
     feat_stride = 16  # downsample 16x for output of conv5 in vgg16
 
     def __init__(self,
-                 n_fg_class=20,
+                 n_fg_class=1000,
                  ratios=[0.5, 1, 2],
                  anchor_scales=[8, 16, 32]
                  ):

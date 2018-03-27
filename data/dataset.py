@@ -1,10 +1,15 @@
+import os.path as osp
+
+import numpy as np
+import pandas as pd
 import torch as t
-from .voc_dataset import VOCBboxDataset
+from PIL import Image
 from skimage import transform as sktsf
 from torchvision import transforms as tvtsf
-from . import util
-import numpy as np
+
 from utils.config import opt
+from . import util
+from .voc_dataset import VOCBboxDataset
 
 
 def inverse_normalize(img):
@@ -73,7 +78,6 @@ def preprocess(img, min_size=600, max_size=1000):
 
 
 class Transform(object):
-
     def __init__(self, min_size=600, max_size=1000):
         self.min_size = min_size
         self.max_size = max_size
@@ -93,6 +97,18 @@ class Transform(object):
             bbox, (o_H, o_W), x_flip=params['x_flip'])
 
         return img, bbox, label, scale
+
+
+class CsvDataset(object):
+    def __init__(self, base, csv_path):
+        self._base = base
+        self._csv = pd.read_csv(csv_path)
+
+    def __getitem__(self, item):
+        img = Image.open(osp.join(self._base, self._csv.iloc[item, 0]))
+        label = self._csv.iloc[item, 5]
+        box = [self._csv.iloc[item, 1], self._csv.iloc[item, 2], self._csv.iloc[item, 3], self._csv.iloc[item, 4]]
+        return img, box, label, 1
 
 
 class Dataset:
