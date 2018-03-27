@@ -144,11 +144,11 @@ class CsvDataset(object):
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
         img_size = img.size
         img = self._transform(img)
-        label = torch.from_numpy(target_csv.iloc[item, 5])
-        x1 = target_csv.iloc[item, 1].values * img_size[0]
-        y1 = target_csv.iloc[item,2].values * img_size[1]
-        x2 = target_csv.iloc[item, 3].values * img_size[0]
-        y2 = target_csv.iloc[item, 4].values * img_size[1]
+        label = torch.LongTensor(int(target_csv.iloc[item, 5]))
+        x1 = float(target_csv.iloc[item, 1] * img_size[0])
+        y1 = float(target_csv.iloc[item,2] * img_size[1])
+        x2 = float(target_csv.iloc[item, 3] * img_size[0])
+        y2 = float(target_csv.iloc[item, 4] * img_size[1])
         box = torch.FloatTensor([x1, y1, x2, y2])
         return img, box, label, torch.FloatTensor(1)
 
