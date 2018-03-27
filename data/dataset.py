@@ -5,6 +5,7 @@ import pandas as pd
 import torch as t
 from PIL import Image
 from skimage import transform as sktsf
+from sklearn.model_selection import train_test_split
 from torchvision import transforms as tvtsf
 
 from utils.config import opt
@@ -103,11 +104,26 @@ class CsvDataset(object):
     def __init__(self, base, csv_path):
         self._base = base
         self._csv = pd.read_csv(csv_path)
+        self._train, self._test = train_test_split(self._csv)
+        self._mode = 'train'
+
+    def set_mode(self, mode):
+        self._mode = mode
+
+    def __len__(self):
+        if self._mode == 'train':
+            return len(self._train)
+        return len(self._test)
 
     def __getitem__(self, item):
-        img = Image.open(osp.join(self._base, self._csv.iloc[item, 0]))
-        label = self._csv.iloc[item, 5]
-        box = [self._csv.iloc[item, 1], self._csv.iloc[item, 2], self._csv.iloc[item, 3], self._csv.iloc[item, 4]]
+        if self._mode == 'train':
+            target_csv = self._train
+        else:
+            target_csv = self._test
+
+        img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
+        label = target_csv.iloc[item, 5]
+        box = [target_csv.iloc[item, 1], target_csv.iloc[item, 2], target_csv.iloc[item, 3], target_csv.iloc[item, 4]]
         return img, box, label, 1
 
 

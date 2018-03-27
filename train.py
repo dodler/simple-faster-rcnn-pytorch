@@ -7,7 +7,7 @@ from torch.autograd import Variable
 from torch.utils import data as data_
 from tqdm import tqdm
 
-from data.dataset import TestDataset, inverse_normalize, CsvDataset
+from data.dataset import inverse_normalize, CsvDataset
 from model import FasterRCNNVGG16
 from trainer import FasterRCNNTrainer
 from utils import array_tool as at
@@ -53,13 +53,14 @@ def train(**kwargs):
                                   shuffle=True, \
                                   # pin_memory=True,
                                   num_workers=opt.num_workers)
-    testset = TestDataset(opt)
-    test_dataloader = data_.DataLoader(testset,
-                                       batch_size=1,
-                                       num_workers=opt.test_num_workers,
-                                       shuffle=False, \
-                                       pin_memory=True
-                                       )
+
+    # testset = TestDataset(opt)
+    # test_dataloader = data_.DataLoader(testset,
+    #                                    batch_size=1,
+    #                                    num_workers=opt.test_num_workers,
+    #                                    shuffle=False, \
+    #                                    pin_memory=True
+    #                                    )
     faster_rcnn = FasterRCNNVGG16()
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
