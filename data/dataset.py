@@ -2,6 +2,7 @@ import os.path as osp
 
 import numpy as np
 import pandas as pd
+import torch
 import torch as t
 from PIL import Image
 from skimage import transform as sktsf
@@ -99,22 +100,24 @@ class Transform(object):
 
         return img, bbox, label, scale
 
+
 class CsvDB:
     def __init__(self, labels_len):
         self.label_names = []
         for i in range(labels_len):
-            self.label_names.append('label' +str(i))
+            self.label_names.append('label' + str(i))
+
 
 from torchvision.transforms import *
-
 
 rgb_mean = (0.4914, 0.4822, 0.4465)
 rgb_std = (0.2023, 0.1994, 0.2010)
 
-size=224
+size = 224
+
 
 class CsvDataset(object):
-    def __init__(self, base, csv_path, transform = None):
+    def __init__(self, base, csv_path, transform=None):
         self._transform = transform
         self._base = base
         self._csv = pd.read_csv(csv_path)
@@ -122,7 +125,7 @@ class CsvDataset(object):
         self._mode = 'train'
         self.db = CsvDB(1000)
         if transform is None:
-            self._transform = Compose([Resize((size,size)), ToTensor(), Normalize(rgb_mean, rgb_std)])
+            self._transform = Compose([Resize((size, size)), ToTensor(), Normalize(rgb_mean, rgb_std)])
 
     def set_mode(self, mode):
         self._mode = mode
@@ -142,8 +145,13 @@ class CsvDataset(object):
         img_size = img.size()
         img = self._transform(img)
         label = torch.LongTensor(target_csv.iloc[item, 5])
-        box = [target_csv.iloc[item, 1], target_csv.iloc[item, 2], target_csv.iloc[item, 3], target_csv.iloc[item, 4]]
-        return img, box, label, 1
+        x1 = target_csv.iloc[item, 1] * img_size[0]
+        y1 = target_csv.iloc[item,2] * img_size[1]
+        x2 = target_csv.iloc[item, 3] * img_size[0]
+        y2 = target_csv.iloc[item, 4] * img_size[1]
+        box = torch.LongTensor(np.array([x1, y1, x2, y2], dtype=np.long))
+        return img, box, label, torch.LongTensor(1)
+
 
 class Dataset:
     def __init__(self, opt):
