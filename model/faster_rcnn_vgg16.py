@@ -72,7 +72,7 @@ class FasterRCNNVGG16(FasterRCNN):
         head = VGG16RoIHead(
             n_class=n_fg_class + 1,
             roi_size=7,
-            spatial_scale=(1. / lf.feat_stride),
+            spatial_scale=(1. / self.feat_stride),
             classifier=classifier
         )
 
