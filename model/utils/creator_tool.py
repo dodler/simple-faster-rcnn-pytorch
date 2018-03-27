@@ -1,5 +1,5 @@
-import numpy as np
 import cupy as cp
+import numpy as np
 
 from model.utils.bbox_tools import bbox2loc, bbox_iou, loc2bbox
 from model.utils.nms import non_maximum_suppression
@@ -89,8 +89,8 @@ class ProposalTargetCreator(object):
                 value 0 is the background.
 
         """
-#        n_bbox, _ = bbox.shape
-        n_bbox = bbox.shape
+        n_bbox, _ = bbox.shape
+        # n_bbox = bbox.shape
 
         print(bbox, bbox.shape, roi, roi.shape)
         roi = np.concatenate((roi, bbox), axis=0)

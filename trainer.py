@@ -1,16 +1,16 @@
-from collections import namedtuple
 import time
-from torch.nn import functional as F
-from model.utils.creator_tool import AnchorTargetCreator, ProposalTargetCreator
+from collections import namedtuple
 
-from torch import nn
 import torch as t
+from torch import nn
 from torch.autograd import Variable
-from utils import array_tool as at
-from utils.vis_tool import Visualizer
-
-from utils.config import opt
+from torch.nn import functional as F
 from torchnet.meter import ConfusionMeter, AverageValueMeter
+
+from model.utils.creator_tool import AnchorTargetCreator, ProposalTargetCreator
+from utils import array_tool as at
+from utils.config import opt
+from utils.vis_tool import Visualizer
 
 LossTuple = namedtuple('LossTuple',
                        ['rpn_loc_loss',
@@ -104,6 +104,8 @@ class FasterRCNNTrainer(nn.Module):
         rpn_score = rpn_scores[0]
         rpn_loc = rpn_locs[0]
         roi = rois
+
+        print(bbox, label, roi)
 
         # Sample RoIs and forward
         # it's fine to break the computation graph of rois, 

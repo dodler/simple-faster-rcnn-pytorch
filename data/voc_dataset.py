@@ -85,7 +85,7 @@ class VOCBboxDataset:
     def __len__(self):
         return len(self.ids)
 
-    def get_example(self, i):
+    def tget_example(self, i):
         """Returns the i-th example.
 
         Returns a color image and bounding boxes. The image is in CHW format.
