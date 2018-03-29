@@ -45,39 +45,41 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     return result
 
 
+VOC = False
+
 def train(**kwargs):
     opt._parse(kwargs)
 
-    # dataset = Dataset(opt)
-    dataset = CsvDataset('/home/artemlyan/data/avito_intro/images/', 'labeled_with_classes.csv')
-    print('load data')
-    dataloader = data_.DataLoader(dataset, \
-                                  batch_size=1, \
-                                  shuffle=True, \
-                                  # pin_memory=True,
-                                  num_workers=opt.num_workers)
+    if not VOC:
+        dataset = CsvDataset('/home/artemlyan/data/avito_intro/images/', 'labeled_with_classes.csv')
+        print('load data')
+        dataloader = data_.DataLoader(dataset, \
+                                      batch_size=1, \
+                                      shuffle=True, \
+                                      # pin_memory=True,
+                                      num_workers=opt.num_workers)
 
-    test_dataloader = data_.DataLoader(dataset,
-                                       batch_size=1,
-                                       num_workers=opt.test_num_workers,
-                                       shuffle=False, \
-                                       pin_memory=True
-                                       )
-
-    dataset = Dataset(opt)
-    print('load data')
-    dataloader = data_.DataLoader(dataset, \
-                                  batch_size=1, \
-                                  shuffle=True, \
-                                  # pin_memory=True,
-                                  num_workers=opt.num_workers)
-    testset = TestDataset(opt)
-    test_dataloader = data_.DataLoader(testset,
-                                       batch_size=1,
-                                       num_workers=opt.test_num_workers,
-                                       shuffle=False, \
-                                       pin_memory=True
-                                       )
+        test_dataloader = data_.DataLoader(dataset,
+                                           batch_size=1,
+                                           num_workers=opt.test_num_workers,
+                                           shuffle=False, \
+                                           pin_memory=True
+                                           )
+    else:
+        dataset = Dataset(opt)
+        print('load data for VOC')
+        dataloader = data_.DataLoader(dataset, \
+                                      batch_size=1, \
+                                      shuffle=True, \
+                                      # pin_memory=True,
+                                      num_workers=opt.num_workers)
+        testset = TestDataset(opt)
+        test_dataloader = data_.DataLoader(testset,
+                                           batch_size=1,
+                                           num_workers=opt.test_num_workers,
+                                           shuffle=False, \
+                                           pin_memory=True
+                                           )
     faster_rcnn = FasterRCNNVGG16()
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
@@ -89,7 +91,8 @@ def train(**kwargs):
     best_map = 0
     lr_ = opt.lr
     for epoch in range(opt.epoch):
-#        dataset.set_mode('train')
+        if not VOC:
+            dataset.set_mode('train')
         trainer.reset_meters()
         for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
             print(img.size(), bbox_.size(), label_.size(), scale.size())
@@ -126,9 +129,11 @@ def train(**kwargs):
                 # roi confusion matrix
                 trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
 
-#        dataset.set_mode('val')
+        if not VOC:
+            dataset.set_mode('val')
+
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
-        print(eval_result)
+        print("eval reuslt:", eval_result)
 
         if eval_result['map'] > best_map:
             best_map = eval_result['map']
