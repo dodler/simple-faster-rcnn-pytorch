@@ -22,7 +22,7 @@ def totensor(data, cuda=True):
     if isinstance(data, t.autograd.Variable):
         tensor = data.data
     if cuda:
-        tensor = tensor.cuda()
+        tensor = tensor.cuda(async=False)
     return tensor
 
 

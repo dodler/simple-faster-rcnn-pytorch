@@ -34,6 +34,11 @@ VOC_BBOX_LABEL_NAMES = (
     'tv',
 )
 
+VOC_BBOX_LABEL_NAMES = []
+
+for i in range(1000):
+    VOC_BBOX_LABEL_NAMES.append('class_' + str(i))
+
 
 def vis_image(img, ax=None):
     """Visualize a color image.
@@ -115,7 +120,7 @@ def vis_bbox(img, bbox, label=None, score=None, ax=None):
             lb = label[i]
             if not (-1 <= lb < len(label_names)):  # modfy here to add backgroud
                 raise ValueError('No corresponding name is given')
-            caption.append(label_names[lb])
+            caption.append(label_names[int(lb)])
         if score is not None:
             sc = score[i]
             caption.append('{:.2f}'.format(sc))

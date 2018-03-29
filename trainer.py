@@ -1,6 +1,8 @@
 import time
 from collections import namedtuple
 
+import numpy as np
+
 import torch as t
 from torch import nn
 from torch.autograd import Variable
@@ -11,6 +13,8 @@ from model.utils.creator_tool import AnchorTargetCreator, ProposalTargetCreator
 from utils import array_tool as at
 from utils.config import opt
 from utils.vis_tool import Visualizer
+
+criterion = nn.CrossEntropyLoss().cuda()
 
 LossTuple = namedtuple('LossTuple',
                        ['rpn_loc_loss',
@@ -58,7 +62,7 @@ class FasterRCNNTrainer(nn.Module):
 
         # indicators for training status
         self.rpn_cm = ConfusionMeter(2)
-        self.roi_cm = ConfusionMeter(21)
+        self.roi_cm = ConfusionMeter(1001)
         self.meters = {k: AverageValueMeter() for k in LossTuple._fields}  # average loss
 
     def forward(self, imgs, bboxes, labels, scale):
@@ -105,8 +109,6 @@ class FasterRCNNTrainer(nn.Module):
         rpn_loc = rpn_locs[0]
         roi = rois
 
-        print(bbox, label, roi)
-
         # Sample RoIs and forward
         # it's fine to break the computation graph of rois, 
         # consider them as constant input
@@ -147,6 +149,7 @@ class FasterRCNNTrainer(nn.Module):
         roi_cls_loc = roi_cls_loc.view(n_sample, -1, 4)
         roi_loc = roi_cls_loc[t.arange(0, n_sample).long().cuda(), \
                               at.totensor(gt_roi_label).long()]
+
         gt_roi_label = at.tovariable(gt_roi_label).long()
         gt_roi_loc = at.tovariable(gt_roi_loc)
 
@@ -156,7 +159,7 @@ class FasterRCNNTrainer(nn.Module):
             gt_roi_label.data,
             self.roi_sigma)
 
-        roi_cls_loss = nn.CrossEntropyLoss()(roi_score, gt_roi_label.cuda())
+        roi_cls_loss = criterion(roi_score, gt_roi_label.cuda())
 
         self.roi_cm.add(at.totensor(roi_score, False), gt_roi_label.data.long())
 

@@ -54,13 +54,12 @@ def train(**kwargs):
                                   # pin_memory=True,
                                   num_workers=opt.num_workers)
 
-    # testset = TestDataset(opt)
-    # test_dataloader = data_.DataLoader(testset,
-    #                                    batch_size=1,
-    #                                    num_workers=opt.test_num_workers,
-    #                                    shuffle=False, \
-    #                                    pin_memory=True
-    #                                    )
+    test_dataloader = data_.DataLoader(dataset,
+                                       batch_size=1,
+                                       num_workers=opt.test_num_workers,
+                                       shuffle=False, \
+                                       pin_memory=True
+                                       )
     faster_rcnn = FasterRCNNVGG16()
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
@@ -72,6 +71,7 @@ def train(**kwargs):
     best_map = 0
     lr_ = opt.lr
     for epoch in range(opt.epoch):
+        dataset.set_mode('train')
         trainer.reset_meters()
         for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
             scale = at.scalar(scale)
@@ -88,6 +88,7 @@ def train(**kwargs):
 
                 # plot groud truth bboxes
                 ori_img_ = inverse_normalize(at.tonumpy(img[0]))
+                print(label_[0])
                 gt_img = visdom_bbox(ori_img_,
                                      at.tonumpy(bbox_[0]),
                                      at.tonumpy(label_[0]))
@@ -105,6 +106,8 @@ def train(**kwargs):
                 trainer.vis.text(str(trainer.rpn_cm.value().tolist()), win='rpn_cm')
                 # roi confusion matrix
                 trainer.vis.img('roi_cm', at.totensor(trainer.roi_cm.conf, False).float())
+
+        dataset.set_mode('val')
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
 
         if eval_result['map'] > best_map:
