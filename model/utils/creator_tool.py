@@ -92,7 +92,6 @@ class ProposalTargetCreator(object):
         n_bbox, _ = bbox.shape
         # n_bbox = bbox.shape
 
-        print(bbox, bbox.shape, roi, roi.shape)
         roi = np.concatenate((roi, bbox), axis=0)
 
         pos_roi_per_image = np.round(self.n_sample * self.pos_ratio)
