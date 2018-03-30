@@ -2,7 +2,6 @@ import os.path as osp
 
 import numpy as np
 import pandas as pd
-import torch
 import torch as t
 from PIL import Image
 from skimage import transform as sktsf
@@ -140,24 +139,25 @@ class CsvDataset(object):
         else:
             target_csv = self._test
 
-        img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        img = np.asarray(img, dtype=np.float32)
+        orig_img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
+        img = np.asarray(orig_img, dtype=np.float32)
         _, H, W = img.shape
         # img = self._transform(img)
         # label = np.zeros(1000)
         # label[int(target_csv.iloc[item, 5])-1] = 1
-        label = torch.FloatTensor([int(target_csv.iloc[item, 5])])
+        label = np.array([int(target_csv.iloc[item, 5])])
         y1 = float(target_csv.iloc[item, 1] * H)
         x1 = float(target_csv.iloc[item, 2] * W)
         y2 = float(target_csv.iloc[item, 3] * H)
         x2 = float(target_csv.iloc[item, 4] * W)
-        box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
+        # box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
+        box = np.array([x1, y1, x2, y2], dtype=np.float32)
         if self._mode == 'train':
             img, bbox, label, scale = self.tsf((img, box, label))
-            return img.copy(), bbox.copy(), label.copy(), torch.FLoatTensor([1])
+            return img.copy(), bbox.copy(), label.copy(), scale
         else:
-            img = preprocess(img)
-            return img, torch.FloatTensor([H,W]).view((2, 1, 1)), box, label, torch.FloatTensor([1])
+            img = preprocess(orig_img)
+            return img, orig_img.shape[1:], box, label, 0
 
 
 class Dataset:
