@@ -26,7 +26,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
-        sizes = sizes.view((2,1))
+        sizes = sizes.view((2, 1))
         sizes = [sizes[0][0], sizes[1][0]]
         pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
         gt_bboxes += list(gt_bboxes_.numpy())
@@ -46,6 +46,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 
 
 VOC = False
+
 
 def train(**kwargs):
     opt._parse(kwargs)
@@ -117,7 +118,7 @@ def train(**kwargs):
 
                 # plot predicti bboxes
                 _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
-                print('pred',_bboxes, 'gt',bbox_[0])
+                print('pred', _bboxes, 'gt', bbox_[0])
                 pred_img = visdom_bbox(ori_img_,
                                        at.tonumpy(_bboxes[0]),
                                        at.tonumpy(_labels[0]).reshape(-1),
@@ -148,7 +149,7 @@ def train(**kwargs):
                                                   str(eval_result['map']),
                                                   str(trainer.get_meter_data()))
         trainer.vis.log(log_info)
-        if epoch == 30: 
+        if epoch == 30:
             break
 
 

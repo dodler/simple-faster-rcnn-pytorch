@@ -108,14 +108,13 @@ class CsvDB:
             self.label_names.append('label' + str(i))
 
 
-from torchvision.transforms import *
-
 rgb_mean = (0.4914, 0.4822, 0.4465)
 rgb_std = (0.2023, 0.1994, 0.2010)
 
 size = 320
 
 from utils.config import CLASS_NUM
+
 
 class CsvDataset(object):
     def __init__(self, base, csv_path, transform=None):
@@ -125,8 +124,7 @@ class CsvDataset(object):
         self._train, self._test = train_test_split(self._csv)
         self._mode = 'train'
         self.db = CsvDB(CLASS_NUM)
-        if transform is None:
-            self._transform = Compose([Resize((size, size)), ToTensor(), Normalize(rgb_mean, rgb_std)])
+        self.tsf = Transform(opt.min_size, opt.max_size)
 
     def set_mode(self, mode):
         self._mode = mode
@@ -143,20 +141,22 @@ class CsvDataset(object):
             target_csv = self._test
 
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        img_size = [size,size]
-        img = self._transform(img)
-        #label = np.zeros(1000)
-        #label[int(target_csv.iloc[item, 5])-1] = 1
+        img_size = img.size
+        # img = self._transform(img)
+        # label = np.zeros(1000)
+        # label[int(target_csv.iloc[item, 5])-1] = 1
         label = torch.FloatTensor([int(target_csv.iloc[item, 5])])
         y1 = float(target_csv.iloc[item, 1] * img_size[0])
         x1 = float(target_csv.iloc[item, 2] * img_size[1])
         y2 = float(target_csv.iloc[item, 3] * img_size[0])
         x2 = float(target_csv.iloc[item, 4] * img_size[1])
-        box = torch.FloatTensor([x1, y1, x2, y2]).view(1,4)
+        box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
         if self._mode == 'train':
-            return img, box, label, torch.FloatTensor([0.5])
+            img, bbox, label, scale = self.tsf((img, box, label))
+            return img.copy(), bbox.copy(), label.copy(), torch.FLoatTensor([1])
         else:
-            return img,torch.FloatTensor([img_size]).view((2,1,1)),box, label, torch.FloatTensor([1])
+            img = preprocess(img)
+            return img, torch.FloatTensor([img_size]).view((2, 1, 1)), box, label, torch.FloatTensor([1])
 
 
 class Dataset:
