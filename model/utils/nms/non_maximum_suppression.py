@@ -98,7 +98,9 @@ def _non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
     if limit is not None:
         selec = selec[:limit]
 #    print('suppression', len(selec))
-    return cp.asnumpy(selec)
+    asnumpy = cp.asnumpy(selec)
+    print('asnumpy', asnumpy)
+    return asnumpy
 
 
 _nms_gpu_code = '''
