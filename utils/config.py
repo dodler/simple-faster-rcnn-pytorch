@@ -1,6 +1,6 @@
 from pprint import pprint
 
-CLASS_NUM = 1000
+CLASS_NUM = 300
 
 # Default Configs for training
 # NOTE that, config items could be overwriten by passing argument through command line.

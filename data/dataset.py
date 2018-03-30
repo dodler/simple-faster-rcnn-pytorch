@@ -86,6 +86,7 @@ class Transform(object):
     def __call__(self, in_data):
         img, bbox, label = in_data
         _, H, W = img.shape
+        print("h", H, "W", W)
         img = preprocess(img, self.min_size, self.max_size)
         _, o_H, o_W = img.shape
         scale = o_H / H
@@ -139,19 +140,26 @@ class CsvDataset(object):
         else:
             target_csv = self._test
 
-        orig_img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
+        orig_img = Image.open(osp.join(self._base, target_csv.iloc[item, 0])).convert('RGB')
         img = np.asarray(orig_img, dtype=np.float32)
+        if img.ndim == 2:
+        # reshape (H, W) -> (1, H, W)
+            img = img[np.newaxis]
+        else:
+        # transpose (H, W, C) -> (C, H, W)
+            img= img.transpose((2, 0, 1))
+
         _, H, W = img.shape
         # img = self._transform(img)
         # label = np.zeros(1000)
         # label[int(target_csv.iloc[item, 5])-1] = 1
         label = np.array([int(target_csv.iloc[item, 5])])
-        y1 = float(target_csv.iloc[item, 1] * H)
-        x1 = float(target_csv.iloc[item, 2] * W)
-        y2 = float(target_csv.iloc[item, 3] * H)
-        x2 = float(target_csv.iloc[item, 4] * W)
+        x1 = float(target_csv.iloc[item, 1] * H)
+        y1 = float(target_csv.iloc[item, 2] * W)
+        x2 = float(target_csv.iloc[item, 3] * H)
+        y2 = float(target_csv.iloc[item, 4] * W)
         # box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
-        box = np.array([x1, y1, x2, y2], dtype=np.float32)
+        box = np.array([x1, y1, x2, y2], dtype=np.float32).reshape((1,4))
         if self._mode == 'train':
             img, bbox, label, scale = self.tsf((img, box, label))
             return img.copy(), bbox.copy(), label.copy(), scale
