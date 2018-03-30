@@ -239,6 +239,7 @@ class FasterRCNN(nn.Module):
             img = t.autograd.Variable(at.totensor(img).float()[None], volatile=True)
             scale = img.shape[3] / size[1]
             roi_cls_loc, roi_scores, rois, _ = self(img, scale=scale)
+            print(roi_cls_loc, roi_scores, rois)
             # We are assuming that batch size is 1.
             roi_score = roi_scores.data
             roi_cls_loc = roi_cls_loc.data
