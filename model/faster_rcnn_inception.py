@@ -3,7 +3,7 @@ from faster_rcnn import FasterRCNN
 
 class FasterRCNNInception(FasterRCNN):
     def __init__(self):
-        n_fg_classes = 1000
+        n_fg_classes = CLASS_NUMBER
 
         extractor = inception3()
 

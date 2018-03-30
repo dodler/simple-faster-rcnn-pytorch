@@ -1,8 +1,6 @@
 import time
 from collections import namedtuple
 
-import numpy as np
-
 import torch as t
 from torch import nn
 from torch.autograd import Variable
@@ -118,6 +116,11 @@ class FasterRCNNTrainer(nn.Module):
             at.tonumpy(label),
             self.loc_normalize_mean,
             self.loc_normalize_std)
+
+        print('sample roi',sample_roi.shape,
+              'gt roi', gt_roi_loc.shape,
+              'roi', roi.shape)
+
         # NOTE it's all zero because now it only support for batch=1 now
         sample_roi_index = t.zeros(len(sample_roi))
         roi_cls_loc, roi_score = self.faster_rcnn.head(

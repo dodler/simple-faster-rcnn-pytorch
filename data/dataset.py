@@ -9,7 +9,7 @@ from skimage import transform as sktsf
 from sklearn.model_selection import train_test_split
 from torchvision import transforms as tvtsf
 
-from utils.config import opt
+from utils.config import opt, CLASS_NUMBER
 from . import util
 from .voc_dataset import VOCBboxDataset
 
@@ -123,7 +123,7 @@ class CsvDataset(object):
         self._csv = pd.read_csv(csv_path)
         self._train, self._test = train_test_split(self._csv)
         self._mode = 'train'
-        self.db = CsvDB(1000)
+        self.db = CsvDB(CLASS_NUMBER)
         if transform is None:
             self._transform = Compose([Resize((size, size)), ToTensor(), Normalize(rgb_mean, rgb_std)])
 
@@ -142,20 +142,18 @@ class CsvDataset(object):
             target_csv = self._test
 
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        img_size = [224,224]
+        img_size = [size, size]
         img = self._transform(img)
-        #label = np.zeros(1000)
-        #label[int(target_csv.iloc[item, 5])-1] = 1
         label = torch.FloatTensor([int(target_csv.iloc[item, 5])])
         y1 = float(target_csv.iloc[item, 1] * img_size[0])
         x1 = float(target_csv.iloc[item, 2] * img_size[1])
         y2 = float(target_csv.iloc[item, 3] * img_size[0])
         x2 = float(target_csv.iloc[item, 4] * img_size[1])
-        box = torch.FloatTensor([x1, y1, x2, y2]).view(1,4)
+        box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
         if self._mode == 'train':
             return img, box, label, torch.FloatTensor([0.5])
         else:
-            return img,torch.FloatTensor([img_size]).view((2,1,1)),box, label, torch.FloatTensor([1])
+            return img, torch.FloatTensor([img_size]).view((2, 1)), box, label, torch.FloatTensor([0])
 
 
 class Dataset:
