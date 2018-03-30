@@ -168,6 +168,7 @@ class FasterRCNN(nn.Module):
             mask = prob_l > self.score_thresh
             cls_bbox_l = cls_bbox_l[mask]
             prob_l = prob_l[mask]
+            print(prob_l)
             keep = non_maximum_suppression(
                 cp.array(cls_bbox_l), self.nms_thresh, prob_l)
             keep = cp.asnumpy(keep)
