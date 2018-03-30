@@ -35,6 +35,7 @@ def decom_vgg16():
 
     return nn.Sequential(*features), classifier
 
+from utils.config import CLASS_NUM
 
 class FasterRCNNVGG16(FasterRCNN):
     """Faster R-CNN based on VGG-16.
@@ -55,7 +56,7 @@ class FasterRCNNVGG16(FasterRCNN):
     feat_stride = 16  # downsample 16x for output of conv5 in vgg16
 
     def __init__(self,
-                 n_fg_class=1000,
+                 n_fg_class=CLASS_NUM,
                  ratios=[0.5, 1, 2],
                  anchor_scales=[8, 16, 32]
                  ):

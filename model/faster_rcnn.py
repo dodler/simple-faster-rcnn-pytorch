@@ -157,23 +157,38 @@ class FasterRCNN(nn.Module):
         bbox = list()
         label = list()
         score = list()
+        #print(self.n_class)
         # skip cls_id = 0 because it is the background class
         for l in range(1, self.n_class):
             cls_bbox_l = raw_cls_bbox.reshape((-1, self.n_class, 4))[:, l, :]
+            #print('cls bbox l',cls_bbox_l)
             prob_l = raw_prob[:, l]
             mask = prob_l > self.score_thresh
+            #print('mask', mask)
             cls_bbox_l = cls_bbox_l[mask]
             prob_l = prob_l[mask]
+            #print('prob l', prob_l)
             keep = non_maximum_suppression(
                 cp.array(cls_bbox_l), self.nms_thresh, prob_l)
             keep = cp.asnumpy(keep)
-            bbox.append(cls_bbox_l[keep])
+            if len(keep) >0:
+                keep[0] = True
+                bbox.append(cls_bbox_l[0])
+                score.append(prob_l[0])
+            else:
+                bbox.append(cls_bbox_l[keep])
+                score.append(prob_l[keep])
+
+#            bbox.append(cls_bbox_l[keep])
             # The labels are in [0, self.n_class - 2].
             label.append((l - 1) * np.ones((len(keep),)))
-            score.append(prob_l[keep])
-        bbox = np.concatenate(bbox, axis=0).astype(np.float32)
-        label = np.concatenate(label, axis=0).astype(np.int32)
-        score = np.concatenate(score, axis=0).astype(np.float32)
+        #print('keep len', len(keep))
+        bbox = bbox[0] # merge them 
+#        bbox = np.concatenate(bbox, axis=0).astype(np.float32)
+        label = label[0]
+#        label = np.concatenate(label, axis=0).astype(np.int32)
+        score = score[0]
+#        score = np.concatenate(score, axis=0).astype(np.float32)
         return bbox, label, score
 
     def predict(self, imgs,sizes=None,visualize=False):

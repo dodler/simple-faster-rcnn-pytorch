@@ -21,7 +21,7 @@ def _load_kernel(kernel_name, code, options=()):
     return kernel_code.get_function(kernel_name)
 
 
-def non_maximum_suppression(bbox, thresh, score=None,
+def non_maximum_suppression(bbox, thresh=0.3, score=None,
                             limit=None):
     """Suppress bounding boxes according to their IoUs.
 
@@ -71,15 +71,20 @@ def non_maximum_suppression(bbox, thresh, score=None,
 
 
 def _non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
+#    print(bbox)
     if len(bbox) == 0:
+#        print('non max return zero')
         return cp.zeros((0,), dtype=np.int32)
 
     n_bbox = bbox.shape[0]
+#    print('nbox =',n_bbox)
 
     if score is not None:
         order = score.argsort()[::-1].astype(np.int32)
     else:
         order = cp.arange(n_bbox, dtype=np.int32)
+
+#    print('order:', order)
 
     sorted_bbox = bbox[order, :]
     selec, n_selec = _call_nms_kernel(
@@ -88,6 +93,7 @@ def _non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
     selec = order[selec]
     if limit is not None:
         selec = selec[:limit]
+#    print('suppression', len(selec))
     return cp.asnumpy(selec)
 
 
@@ -157,6 +163,7 @@ void nms_kernel(const int n_bbox, const float thresh,
 
 
 def _call_nms_kernel(bbox, thresh):
+#    print('nms kernel box', bbox, 'thresh', thresh)
     # PyTorch does not support unsigned long Tensor.
     # Doesn't matter,since it returns ndarray finally.
     # So I'll keep it unmodified.

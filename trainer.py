@@ -3,6 +3,8 @@ from collections import namedtuple
 
 import numpy as np
 
+from utils.config import CLASS_NUM
+
 import torch as t
 from torch import nn
 from torch.autograd import Variable
@@ -62,7 +64,7 @@ class FasterRCNNTrainer(nn.Module):
 
         # indicators for training status
         self.rpn_cm = ConfusionMeter(2)
-        self.roi_cm = ConfusionMeter(1001)
+        self.roi_cm = ConfusionMeter(CLASS_NUM +1 )
         self.meters = {k: AverageValueMeter() for k in LossTuple._fields}  # average loss
 
     def forward(self, imgs, bboxes, labels, scale):

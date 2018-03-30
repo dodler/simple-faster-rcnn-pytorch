@@ -113,8 +113,9 @@ from torchvision.transforms import *
 rgb_mean = (0.4914, 0.4822, 0.4465)
 rgb_std = (0.2023, 0.1994, 0.2010)
 
-size = 224
+size = 320
 
+from utils.config import CLASS_NUM
 
 class CsvDataset(object):
     def __init__(self, base, csv_path, transform=None):
@@ -123,7 +124,7 @@ class CsvDataset(object):
         self._csv = pd.read_csv(csv_path)
         self._train, self._test = train_test_split(self._csv)
         self._mode = 'train'
-        self.db = CsvDB(1000)
+        self.db = CsvDB(CLASS_NUM)
         if transform is None:
             self._transform = Compose([Resize((size, size)), ToTensor(), Normalize(rgb_mean, rgb_std)])
 
@@ -142,7 +143,7 @@ class CsvDataset(object):
             target_csv = self._test
 
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        img_size = [224,224]
+        img_size = [size,size]
         img = self._transform(img)
         #label = np.zeros(1000)
         #label[int(target_csv.iloc[item, 5])-1] = 1
