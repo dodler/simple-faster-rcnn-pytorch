@@ -141,22 +141,23 @@ class CsvDataset(object):
             target_csv = self._test
 
         img = Image.open(osp.join(self._base, target_csv.iloc[item, 0]))
-        img_size = img.size
+        img = np.asarray(img, dtype=np.float32)
+        _, H, W = img.shape
         # img = self._transform(img)
         # label = np.zeros(1000)
         # label[int(target_csv.iloc[item, 5])-1] = 1
         label = torch.FloatTensor([int(target_csv.iloc[item, 5])])
-        y1 = float(target_csv.iloc[item, 1] * img_size[0])
-        x1 = float(target_csv.iloc[item, 2] * img_size[1])
-        y2 = float(target_csv.iloc[item, 3] * img_size[0])
-        x2 = float(target_csv.iloc[item, 4] * img_size[1])
+        y1 = float(target_csv.iloc[item, 1] * H)
+        x1 = float(target_csv.iloc[item, 2] * W)
+        y2 = float(target_csv.iloc[item, 3] * H)
+        x2 = float(target_csv.iloc[item, 4] * W)
         box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
         if self._mode == 'train':
             img, bbox, label, scale = self.tsf((img, box, label))
             return img.copy(), bbox.copy(), label.copy(), torch.FLoatTensor([1])
         else:
             img = preprocess(img)
-            return img, torch.FloatTensor([img_size]).view((2, 1, 1)), box, label, torch.FloatTensor([1])
+            return img, torch.FloatTensor([H,W]).view((2, 1, 1)), box, label, torch.FloatTensor([1])
 
 
 class Dataset:
