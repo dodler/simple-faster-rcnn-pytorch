@@ -1,9 +1,11 @@
 import time
 
-import numpy as np
 import matplotlib
+import numpy as np
 import torch as t
 import visdom
+
+from utils.config import CLASS_NUM
 
 matplotlib.use('Agg')
 from matplotlib import pyplot as plot
@@ -36,7 +38,7 @@ VOC_BBOX_LABEL_NAMES = (
 
 VOC_BBOX_LABEL_NAMES = []
 
-for i in range(1000):
+for i in range(CLASS_NUM):
     VOC_BBOX_LABEL_NAMES.append('class_' + str(i))
 
 

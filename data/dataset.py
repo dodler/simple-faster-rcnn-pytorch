@@ -143,11 +143,11 @@ class CsvDataset(object):
         orig_img = Image.open(osp.join(self._base, target_csv.iloc[item, 0])).convert('RGB')
         img = np.asarray(orig_img, dtype=np.float32)
         if img.ndim == 2:
-        # reshape (H, W) -> (1, H, W)
+            # reshape (H, W) -> (1, H, W)
             img = img[np.newaxis]
         else:
-        # transpose (H, W, C) -> (C, H, W)
-            img= img.transpose((2, 0, 1))
+            # transpose (H, W, C) -> (C, H, W)
+            img = img.transpose((2, 0, 1))
 
         _, H, W = img.shape
         # img = self._transform(img)
@@ -159,7 +159,7 @@ class CsvDataset(object):
         x2 = float(target_csv.iloc[item, 3] * H)
         y2 = float(target_csv.iloc[item, 4] * W)
         # box = torch.FloatTensor([x1, y1, x2, y2]).view(1, 4)
-        box = np.array([x1, y1, x2, y2], dtype=np.float32).reshape((1,4))
+        box = np.array([x1, y1, x2, y2], dtype=np.float32).reshape((1, 4))
         if self._mode == 'train':
             img, bbox, label, scale = self.tsf((img, box, label))
             return img.copy(), bbox.copy(), label.copy(), scale

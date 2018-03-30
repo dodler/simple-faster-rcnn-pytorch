@@ -1,9 +1,11 @@
 from faster_rcnn import FasterRCNN
 
+from utils.config import CLASS_NUM
+
 
 class FasterRCNNInception(FasterRCNN):
     def __init__(self):
-        n_fg_classes = 1000
+        n_fg_classes = CLASS_NUM
 
         extractor = inception3()
 
