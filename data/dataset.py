@@ -1,6 +1,5 @@
-import os.path as osp
-
 import numpy as np
+import os.path as osp
 import pandas as pd
 import torch as t
 from PIL import Image
@@ -86,7 +85,7 @@ class Transform(object):
     def __call__(self, in_data):
         img, bbox, label = in_data
         _, H, W = img.shape
-        print("h", H, "W", W)
+        # print("h", H, "W", W)
         img = preprocess(img, self.min_size, self.max_size)
         _, o_H, o_W = img.shape
         scale = o_H / H
@@ -162,10 +161,11 @@ class CsvDataset(object):
         box = np.array([x1, y1, x2, y2], dtype=np.float32).reshape((1, 4))
         if self._mode == 'train':
             img, bbox, label, scale = self.tsf((img, box, label))
+            # print(img.shape, bbox.shape, label, scale)
             return img.copy(), bbox.copy(), label.copy(), scale
         else:
-            img = preprocess(orig_img)
-            return img, orig_img.shape[1:], box, label, 0
+            img = preprocess(img)
+            return img, img.shape[1:], box, label, 0
 
 
 class Dataset:
@@ -178,6 +178,7 @@ class Dataset:
         ori_img, bbox, label, difficult = self.db.get_example(idx)
 
         img, bbox, label, scale = self.tsf((ori_img, bbox, label))
+        # print(img.shape, bbox.shape, label, scale)
         # TODO: check whose stride is negative to fix this instead copy all
         # some of the strides of a given numpy array are negative.
         return img.copy(), bbox.copy(), label.copy(), scale
@@ -194,6 +195,7 @@ class TestDataset:
     def __getitem__(self, idx):
         ori_img, bbox, label, difficult = self.db.get_example(idx)
         img = preprocess(ori_img)
+        # print(img.shape, bbox.shape, label, difficult)
         return img, ori_img.shape[1:], bbox, label, difficult
 
     def __len__(self):

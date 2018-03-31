@@ -1,6 +1,6 @@
 from pprint import pprint
 
-CLASS_NUM = 300
+CLASS_NUM = 1000
 
 # Default Configs for training
 # NOTE that, config items could be overwriten by passing argument through command line.
@@ -29,7 +29,7 @@ class Config:
     # visualization
     env = 'faster-rcnn'  # visdom env
     port = 8097
-    plot_every = 15  # vis every N iter
+    plot_every = 5  # vis every N iter
 
     # preset
     data = 'voc'

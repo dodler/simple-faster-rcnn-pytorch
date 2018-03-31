@@ -20,15 +20,12 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (20480, rlimit[1]))
 
 matplotlib.use('agg')
 
-best_path = 'model.pth'
-
 def eval(dataloader, faster_rcnn, test_num=10000):
     pred_bboxes, pred_labels, pred_scores = list(), list(), list()
     gt_bboxes, gt_labels, gt_difficults = list(), list(), list()
     for ii, (imgs, sizes, gt_bboxes_, gt_labels_, gt_difficults_) in tqdm(enumerate(dataloader)):
-        sizes = sizes.view((2, 1))
         sizes = [sizes[0][0], sizes[1][0]]
-        pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes])
+        pred_bboxes_, pred_labels_, pred_scores_ = faster_rcnn.predict(imgs, [sizes], visualize=True)
         gt_bboxes += list(gt_bboxes_.numpy())
         gt_labels += list(gt_labels_.numpy())
         gt_difficults += list(gt_difficults_.numpy())
@@ -41,7 +38,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
         pred_bboxes, pred_labels, pred_scores,
         gt_bboxes, gt_labels, gt_difficults,
         use_07_metric=True)
-    print(result)
+    # print(result)
     return result
 
 
@@ -52,7 +49,7 @@ def train(**kwargs):
     opt._parse(kwargs)
 
     if not VOC:
-        dataset = CsvDataset('/home/artemlyan/data/avito_intro/images/', 'labeled_with_classes.csv')
+        dataset = CsvDataset('/home/artemlyan/data/avito_intro/images/', '/home/artemlyan/data/avito_intro/labeled_with_classes.csv')
         print('load data')
         dataloader = data_.DataLoader(dataset, \
                                       batch_size=1, \
@@ -96,7 +93,7 @@ def train(**kwargs):
             dataset.set_mode('train')
         trainer.reset_meters()
         for ii, (img, bbox_, label_, scale) in tqdm(enumerate(dataloader)):
-            print(img.size(), bbox_.size(), label_.size(), scale.size())
+            # print(img.size(), bbox_.size(), label_.size(), scale.size())
             scale = at.scalar(scale)
             img, bbox, label = img.cuda().float(), bbox_.cuda(), label_.cuda()
             img, bbox, label = Variable(img), Variable(bbox), Variable(label)
@@ -118,7 +115,7 @@ def train(**kwargs):
 
                 # plot predicti bboxes
                 _bboxes, _labels, _scores = trainer.faster_rcnn.predict([ori_img_], visualize=True)
-                print('pred', _bboxes, 'gt', bbox_[0])
+                # print('pred', _bboxes, 'gt', bbox_[0])
                 pred_img = visdom_bbox(ori_img_,
                                        at.tonumpy(_bboxes[0]),
                                        at.tonumpy(_labels[0]).reshape(-1),
@@ -136,7 +133,8 @@ def train(**kwargs):
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         print("eval reuslt:", eval_result)
 
-        if eval_result['map'] > best_map:
+        if eval_result['map'] > best_map or epoch == 1:
+            print('saving map')
             best_map = eval_result['map']
             best_path = trainer.save(best_map=best_map)
         if epoch == 9:
@@ -149,7 +147,7 @@ def train(**kwargs):
                                                   str(eval_result['map']),
                                                   str(trainer.get_meter_data()))
         trainer.vis.log(log_info)
-        if epoch == 30:
+        if epoch == 100:
             break
 
 

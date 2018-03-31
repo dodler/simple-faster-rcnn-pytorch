@@ -72,13 +72,11 @@ def non_maximum_suppression(bbox, thresh=0.3, score=None,
 
 
 def _non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
-#    print(bbox)
+    # print('bbox non max suppress',bbox)
     if len(bbox) == 0:
-        print('non max return zero')
         return cp.zeros((0,), dtype=np.int32)
 
     n_bbox = bbox.shape[0]
-#    print('nbox =',n_bbox)
 
     if score is not None:
         order = score.argsort()[::-1].astype(np.int32)
@@ -88,18 +86,15 @@ def _non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
 #    print('order:', order)
 
     sorted_bbox = bbox[order, :]
-    print('sorted bbox', sorted_bbox)
     selec, n_selec = _call_nms_kernel(
         sorted_bbox, thresh)
 
-    print('select',selec, 'n select', n_selec)
     selec = selec[:n_selec]
     selec = order[selec]
     if limit is not None:
         selec = selec[:limit]
-#    print('suppression', len(selec))
     asnumpy = cp.asnumpy(selec)
-    print('asnumpy', asnumpy)
+    # print('asnumpy len' + str(len(asnumpy)))
     return asnumpy
 
 

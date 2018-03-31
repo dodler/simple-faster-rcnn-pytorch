@@ -160,7 +160,7 @@ class FasterRCNN(nn.Module):
         score = list()
         # print(self.n_class)
         # skip cls_id = 0 because it is the background class
-        print(self.n_class)
+        # print(self.n_class)
         for l in range(1, self.n_class):
             cls_bbox_l = raw_cls_bbox.reshape((-1, self.n_class, 4))[:, l, :]
             # print('cls bbox l',cls_bbox_l)
@@ -168,21 +168,23 @@ class FasterRCNN(nn.Module):
             mask = prob_l > self.score_thresh
             cls_bbox_l = cls_bbox_l[mask]
             prob_l = prob_l[mask]
-            print(prob_l)
+            # print(prob_l)
             keep = non_maximum_suppression(
                 cp.array(cls_bbox_l), self.nms_thresh, prob_l)
+            # print(keep)
             keep = cp.asnumpy(keep)
             bbox.append(cls_bbox_l[keep])
             # The labels are in [0, self.n_class - 2].
             label.append((l - 1) * np.ones((len(keep),)))
             score.append(prob_l[keep])
 
-        bbox = bbox[0]  # merge them
-        #        bbox = np.concatenate(bbox, axis=0).astype(np.float32)
-        label = label[0]
-        #        label = np.concatenate(label, axis=0).astype(np.int32)
-        score = score[0]
-        #        score = np.concatenate(score, axis=0).astype(np.float32)
+        # bbox = bbox[0]  # merge them
+        bbox = np.concatenate(bbox, axis=0).astype(np.float32)
+        # print('after suppress bbox',bbox)
+        # label = label[0]
+        label = np.concatenate(label, axis=0).astype(np.int32)
+        # score = score[0]
+        score = np.concatenate(score, axis=0).astype(np.float32)
         return bbox, label, score
 
     def predict(self, imgs, sizes=None, visualize=False):
@@ -232,7 +234,7 @@ class FasterRCNN(nn.Module):
             img = t.autograd.Variable(at.totensor(img).float()[None], volatile=True)
             scale = img.shape[3] / size[1]
             roi_cls_loc, roi_scores, rois, _ = self(img, scale=scale)
-            print(roi_cls_loc, roi_scores, rois)
+            # print(roi_cls_loc, roi_scores, rois)
             # We are assuming that batch size is 1.
             roi_score = roi_scores.data
             roi_cls_loc = roi_cls_loc.data
@@ -253,7 +255,7 @@ class FasterRCNN(nn.Module):
             cls_bbox = at.totensor(cls_bbox)
             cls_bbox = cls_bbox.view(-1, self.n_class * 4)
 
-            print('cls bbox:', cls_bbox)
+            # print('cls bbox:', cls_bbox)
 
             # clip bounding box
             cls_bbox[:, 0::2] = (cls_bbox[:, 0::2]).clamp(min=0, max=size[0])
@@ -261,19 +263,18 @@ class FasterRCNN(nn.Module):
 
             prob = at.tonumpy(F.softmax(at.tovariable(roi_score), dim=1))
 
-            print('prob', prob)
+            # print('prob', prob)
 
             raw_cls_bbox = at.tonumpy(cls_bbox)
             raw_prob = at.tonumpy(prob)
 
             bbox, label, score = self._suppress(raw_cls_bbox, raw_prob)
 
-            print('after suppress', bbox,label, score)
-
             bboxes.append(bbox)
             labels.append(label)
             scores.append(score)
 
+        # print('predicted boxes',bboxes)
         self.use_preset('evaluate')
         self.train()
         return bboxes, labels, scores

@@ -1,7 +1,8 @@
 from __future__ import division
 
-from collections import defaultdict
 import itertools
+from collections import defaultdict
+
 import numpy as np
 import six
 
@@ -160,8 +161,9 @@ def calc_detection_voc_prec_rec(
                 pred_bboxes, pred_labels, pred_scores,
                 gt_bboxes, gt_labels, gt_difficults):
 
-        if gt_difficult is None:
-            gt_difficult = np.zeros(gt_bbox.shape[0], dtype=bool)
+        # if gt_difficult is None:
+        # fixme
+        gt_difficult = np.zeros(gt_bbox.shape[0], dtype=bool)
 
         for l in np.unique(np.concatenate((pred_label, gt_label)).astype(int)):
             pred_mask_l = pred_label == l
