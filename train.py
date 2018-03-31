@@ -133,7 +133,7 @@ def train(**kwargs):
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         print("eval reuslt:", eval_result)
 
-        if eval_result['map'] > best_map or epoch == 1:
+        if eval_result['map'] > best_map or epoch == 1 or epoch % 10 == 0:
             print('saving map')
             best_map = eval_result['map']
             best_path = trainer.save(best_map=best_map)
