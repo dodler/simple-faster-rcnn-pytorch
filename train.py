@@ -81,9 +81,10 @@ def train(**kwargs):
     faster_rcnn = FasterRCNNVGG16()
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()
-    if opt.load_path:
-        trainer.load(opt.load_path)
-        print('load pretrained model from %s' % opt.load_path)
+#    if opt.load_path:
+    trainer.load('checkpoints/fasterrcnn_04020358_0.0')
+    print('loaded model')
+ #       print('load pretrained model from %s' % opt.load_path)
 
     trainer.vis.text(dataset.db.label_names, win='labels')
     best_map = 0
@@ -133,7 +134,7 @@ def train(**kwargs):
         eval_result = eval(test_dataloader, faster_rcnn, test_num=opt.test_num)
         print("eval reuslt:", eval_result)
 
-        if eval_result['map'] > best_map or epoch == 1 or epoch % 10 == 0:
+        if eval_result['map'] > best_map or epoch == 30 or epoch % 10 == 0:
             print('saving map')
             best_map = eval_result['map']
             best_path = trainer.save(best_map=best_map)
@@ -147,7 +148,7 @@ def train(**kwargs):
                                                   str(eval_result['map']),
                                                   str(trainer.get_meter_data()))
         trainer.vis.log(log_info)
-        if epoch == 100:
+        if epoch == 200:
             break
 
 
